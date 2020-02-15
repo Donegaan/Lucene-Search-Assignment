@@ -1,0 +1,30 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug (Launch) - Current File",
+      "request": "launch",
+      "mainClass": "${file}",
+      "args": "-docs cran/cran.all.1400"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-IndexFiles<app>",
+      "request": "launch",
+      "mainClass": "com.mycompany.app.IndexFiles",
+      "projectName": "app",
+      "args": "-docs cran/cran.all.1400"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-SearchFiles<app>",
+      "request": "launch",
+      "mainClass": "com.mycompany.app.SearchFiles",
+      "projectName": "app"
+    }
+  ]
+}
