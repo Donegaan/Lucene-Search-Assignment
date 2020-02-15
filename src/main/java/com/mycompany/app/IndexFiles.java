@@ -170,11 +170,12 @@ public class IndexFiles {
         try (InputStream stream = Files.newInputStream(file)) {
             // make a new, empty document
             Document doc;
-            // BufferReader to read in each starting field, ".I" etc.
+            // BufferReader to read in each starting field and line, ".I" etc.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             String currentDocLine;
             String fieldType = "";
 
+            // Go through cran file and create separate documents
             while ((currentDocLine = bufferedReader.readLine()) != null) {
                 String field = currentDocLine.substring(0, 2);
                 if (field.equals(".I")) {
@@ -214,28 +215,6 @@ public class IndexFiles {
                     }
                 }
             }
-
-            // Add the path of the file as a field named "path". Use a
-            // field that is indexed (i.e. searchable), but don't tokenize
-            // the field into separate words and don't index term frequency
-            // or positional information:
-
-            // Add the last modified date of the file a field named "modified".
-            // Use a LongPoint that is indexed (i.e. efficiently filterable with
-            // PointRangeQuery). This indexes to milli-second resolution, which
-            // is often too fine. You could instead create a number based on
-            // year/month/day/hour/minutes/seconds, down the resolution you require.
-            // For example the long value 2011021714 would mean
-            // February 17, 2011, 2-3 PM.
-            // doc.add(new LongPoint("modified", lastModified));
-
-            // Add the contents of the file to a field named "contents". Specify a Reader,
-            // so that the text of the file is tokenized and indexed, but not stored.
-            // Note that FileReader expects the file to be in UTF-8 encoding.
-            // If that's not the case searching for special characters will fail.
-            // doc.add(new TextField("contents",
-            // new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
-
         }
     }
 }
