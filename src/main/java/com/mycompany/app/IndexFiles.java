@@ -183,7 +183,7 @@ public class IndexFiles {
                     doc.add(new StringField("path", currentDocLine, Field.Store.YES)); // Add first field, ".I ID"
                     currentDocLine = bufferedReader.readLine();
                     field = currentDocLine.substring(0, 2);
-                    while (!field.equals(".I") || currentDocLine == null) {
+                    while (!field.equals(".I") && currentDocLine != null) {
                         if (field.equals(".T")) {
                             fieldType = "title";
                             currentDocLine = bufferedReader.readLine();
