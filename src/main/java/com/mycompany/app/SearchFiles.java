@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -36,6 +35,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.store.FSDirectory;
 
 /** Simple command-line based search demo. */
@@ -54,50 +54,28 @@ public class SearchFiles {
 
         String index = "index";
         String queries = null;
-        int repeat = 0;
-        boolean raw = false;
-        String queryString = null;
-        int hitsPerPage = 10;
+        String scoreModel = "vector";
         int queryId = 1;
 
         for (int i = 0; i < args.length; i++) {
-            if ("-index".equals(args[i])) {
-                index = args[i + 1];
-                i++;
-            } else if ("-field".equals(args[i])) {
-                i++;
+            if ("-score".equals(args[i])) {
+                scoreModel = args[i + 1];
             } else if ("-queries".equals(args[i])) {
                 queries = args[i + 1];
-                i++;
-            } else if ("-query".equals(args[i])) {
-                queryString = args[i + 1];
-                i++;
-            } else if ("-repeat".equals(args[i])) {
-                repeat = Integer.parseInt(args[i + 1]);
-                i++;
-            } else if ("-raw".equals(args[i])) {
-                raw = true;
-            } else if ("-paging".equals(args[i])) {
-                hitsPerPage = Integer.parseInt(args[i + 1]);
-                if (hitsPerPage <= 0) {
-                    System.err.println("There must be at least 1 hit per page.");
-                    System.exit(1);
-                }
                 i++;
             }
         }
 
         IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
         IndexSearcher searcher = new IndexSearcher(reader);
-        Analyzer analyzer = new StandardAnalyzer();
+        Analyzer analyzer = new MyAnalyzer();
 
-        // ---------------- Choose Scoring method ----------------
-
-        // Vector Space Model
-        // searcher.setSimilarity(new ClassicSimilarity());
-
-        // BM25
-        searcher.setSimilarity(new BM25Similarity());
+        // Choose Scoring model
+        if (scoreModel.equals("bm25")) {
+            searcher.setSimilarity(new BM25Similarity());
+        } else if (scoreModel.equals("vector")) {
+            searcher.setSimilarity(new ClassicSimilarity());
+        }
 
         BufferedReader in = null;
         if (queries != null) {
@@ -133,6 +111,7 @@ public class SearchFiles {
         }
 
         Query query = parser.parse(QueryParser.escape(queryLines));
+
         doSearch(searcher, query, queryId, writer);
 
         writer.close();

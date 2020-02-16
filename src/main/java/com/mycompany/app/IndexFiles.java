@@ -30,7 +30,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -90,7 +89,7 @@ public class IndexFiles {
             System.out.println("Indexing to directory '" + indexPath + "'...");
 
             Directory dir = FSDirectory.open(Paths.get(indexPath));
-            Analyzer analyzer = new StandardAnalyzer(); // Need to create my own analyzer
+            Analyzer analyzer = new MyAnalyzer(); // Need to create my own analyzer
             IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
             if (create) {
