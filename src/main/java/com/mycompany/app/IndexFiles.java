@@ -34,6 +34,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -164,7 +165,9 @@ public class IndexFiles {
         }
     }
 
-    /** Indexes a single document */
+    // Some code from:
+    // https://github.com/dywalsh/ApacheLucene-Search-Engine/blob/master/my-app/src/main/java/com/mycompany/app/IndexFiles.java
+    // With a slight variance for my own understanding
     // Need to split up collection into separate docs that start with ".I"
     static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
         try (InputStream stream = Files.newInputStream(file)) {
@@ -197,14 +200,14 @@ public class IndexFiles {
                             fieldType = "words";
                             currentDocLine = bufferedReader.readLine();
                         }
-                        doc.add(new StringField(fieldType, currentDocLine, Field.Store.YES));
+                        doc.add(new TextField(fieldType, currentDocLine, Field.Store.YES));
                         currentDocLine = bufferedReader.readLine();
                         field = currentDocLine.substring(0, 2);
                     }
 
                     if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
                         // New index, so we just add the document (no old document can be there):
-                        System.out.println("adding " + file);
+                        // System.out.println("adding " + file);
                         writer.addDocument(doc);
                     } else {
                         // Existing index (an old copy of this document may have been indexed) so

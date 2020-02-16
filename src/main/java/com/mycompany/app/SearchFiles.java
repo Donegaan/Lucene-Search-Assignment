@@ -23,7 +23,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -54,7 +53,6 @@ public class SearchFiles {
         }
 
         String index = "index";
-        String field = "contents";
         String queries = null;
         int repeat = 0;
         boolean raw = false;
@@ -67,7 +65,6 @@ public class SearchFiles {
                 index = args[i + 1];
                 i++;
             } else if ("-field".equals(args[i])) {
-                field = args[i + 1];
                 i++;
             } else if ("-queries".equals(args[i])) {
                 queries = args[i + 1];
