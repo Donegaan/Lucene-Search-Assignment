@@ -89,7 +89,7 @@ public class IndexFiles {
             System.out.println("Indexing to directory '" + indexPath + "'...");
 
             Directory dir = FSDirectory.open(Paths.get(indexPath));
-            Analyzer analyzer = new MyAnalyzer(); // Need to create my own analyzer
+            Analyzer analyzer = new MyAnalyzer();
             IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
             if (create) {
@@ -166,25 +166,29 @@ public class IndexFiles {
 
     // Some code from:
     // https://github.com/dywalsh/ApacheLucene-Search-Engine/blob/master/my-app/src/main/java/com/mycompany/app/IndexFiles.java
+    // and
+    // https://github.com/nating/lucene-search-engine/blob/master/luceneapp/src/main/java/com/mycompany/luceneapp/IndexFiles.java
     // With a slight variance for my own understanding
     // Help also from:
     // https://www.toptal.com/database/full-text-search-of-dialogues-with-apache-lucene
     // Need to split up collection into separate docs that start with ".I"
     static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
         try (InputStream stream = Files.newInputStream(file)) {
-            // make a new, empty document
-            Document doc;
             // BufferReader to read in each starting field and line, ".I" etc.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-            String currentDocLine;
+            String currentDocLine = bufferedReader.readLine();
             String fieldType = "";
+            String title = "", author = "", bib = "", words = "", docId = "";
 
             // Go through cran file and create separate documents
-            while ((currentDocLine = bufferedReader.readLine()) != null) {
+            while (currentDocLine != null) {
                 String field = currentDocLine.substring(0, 2);
                 if (field.equals(".I")) {
-                    doc = new Document(); // Document starts with ".I"
-                    doc.add(new StringField("path", currentDocLine, Field.Store.YES)); // Add first field, ".I ID"
+                    title = "";
+                    author = "";
+                    bib = "";
+                    words = "";
+                    docId = currentDocLine.substring(3);
                     currentDocLine = bufferedReader.readLine();
                     field = currentDocLine.substring(0, 2);
                     while (!field.equals(".I") && currentDocLine != null) {
@@ -201,11 +205,29 @@ public class IndexFiles {
                             fieldType = "words";
                             currentDocLine = bufferedReader.readLine();
                         }
-                        doc.add(new TextField(fieldType, currentDocLine, Field.Store.YES));
+                        switch (fieldType) { // Needed if multiple lines after field.
+                        case "title":
+                            title += currentDocLine + " ";
+                            break;
+                        case "author":
+                            author += currentDocLine + " ";
+                            break;
+                        case "bibliography":
+                            bib += currentDocLine + " ";
+                            break;
+                        case "words":
+                            words += currentDocLine + " ";
+                            break;
+                        }
                         currentDocLine = bufferedReader.readLine();
-                        field = currentDocLine.substring(0, 2);
+                        if (currentDocLine == null) {
+                            break;
+                        } else {
+                            field = currentDocLine.substring(0, 2);
+                        }
                     }
-
+                    Document doc = makeDocument(docId, title, author, bib, words);
+                    // writer.addDocument(doc);
                     if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
                         // New index, so we just add the document (no old document can be there):
                         // System.out.println("adding " + file);
@@ -220,5 +242,17 @@ public class IndexFiles {
                 }
             }
         }
+    }
+
+    // Code from:
+    // https://github.com/nating/lucene-search-engine/blob/master/luceneapp/src/main/java/com/mycompany/luceneapp/IndexFiles.java
+    static Document makeDocument(String id, String title, String author, String bib, String words) {
+        Document doc = new Document();
+        doc.add(new StringField("path", id, Field.Store.YES));
+        doc.add(new TextField("title", title, Field.Store.YES));
+        doc.add(new TextField("author", author, Field.Store.YES));
+        doc.add(new TextField("bibliography", bib, Field.Store.YES));
+        doc.add(new TextField("words", words, Field.Store.YES));
+        return doc;
     }
 }

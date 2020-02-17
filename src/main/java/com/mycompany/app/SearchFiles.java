@@ -68,6 +68,7 @@ public class SearchFiles {
 
         IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
         IndexSearcher searcher = new IndexSearcher(reader);
+        PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
         Analyzer analyzer = new MyAnalyzer();
 
         // Choose Scoring model
@@ -86,7 +87,6 @@ public class SearchFiles {
 
         MultiFieldQueryParser parser = new MultiFieldQueryParser(
                 new String[] { "title", "author", "bibliography", "words" }, analyzer);
-        PrintWriter writer = new PrintWriter("/Users/andrewdonegan/GitHub/info_ret/my-app/output.txt", "UTF-8");
 
         String queryLines = "";
         Boolean first = true;
@@ -97,7 +97,7 @@ public class SearchFiles {
         while ((line = in.readLine()) != null) {
 
             if (line.substring(0, 2).equals(".I")) {
-                if (!first) {
+                if (!first) { // If you come across the next document, indicated by the line being ".I"
                     Query query = parser.parse(QueryParser.escape(queryLines));
                     doSearch(searcher, query, queryId, writer);
                     queryId++;
@@ -134,8 +134,7 @@ public class SearchFiles {
              * (https://stackoverflow.com/questions/4275825/how-to-evaluate-a-search-
              * retrieval-engine-using-trec-eval)
              */
-            writer.println(
-                    queryId + " 0 " + doc.get("path").replace(".I ", "") + " " + i + " " + hits[i].score + " EXP");
+            writer.println(queryId + " 0 " + doc.get("path") + " " + i + " " + hits[i].score + " EXP");
         }
     }
 }

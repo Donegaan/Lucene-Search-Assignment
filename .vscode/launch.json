@@ -24,7 +24,8 @@
       "name": "Debug (Launch)-SearchFiles<app>",
       "request": "launch",
       "mainClass": "com.mycompany.app.SearchFiles",
-      "projectName": "app"
+      "projectName": "app",
+      "args": "-queries cran/cran.qry -score bm25"
     }
   ]
 }
