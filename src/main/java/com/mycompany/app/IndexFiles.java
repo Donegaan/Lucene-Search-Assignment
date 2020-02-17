@@ -167,6 +167,8 @@ public class IndexFiles {
     // Some code from:
     // https://github.com/dywalsh/ApacheLucene-Search-Engine/blob/master/my-app/src/main/java/com/mycompany/app/IndexFiles.java
     // With a slight variance for my own understanding
+    // Help also from:
+    // https://www.toptal.com/database/full-text-search-of-dialogues-with-apache-lucene
     // Need to split up collection into separate docs that start with ".I"
     static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
         try (InputStream stream = Files.newInputStream(file)) {
