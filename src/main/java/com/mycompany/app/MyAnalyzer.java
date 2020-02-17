@@ -21,13 +21,13 @@ public class MyAnalyzer extends Analyzer {
     // --------------------- Select a tokenizer --------------------
 
     // StandardTokenizer - “full” “text” “lucene.apache.org”
-    StandardTokenizer tokenizer = new StandardTokenizer();
+    // StandardTokenizer tokenizer = new StandardTokenizer();
 
     // WhitespaceTokenizer - “full-text” “lucene.apache.org”
     // WhitespaceTokenizer tokenizer = new WhitespaceTokenizer();
 
     // LetterTokenizer - “full” “text” “lucene” “apache” “org”
-    // LetterTokenizer tokenizer = new LetterTokenizer();
+    LetterTokenizer tokenizer = new LetterTokenizer();
 
     // --------------------- Create the token stream --------------------
 

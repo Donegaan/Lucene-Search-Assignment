@@ -56,6 +56,8 @@ public class SearchFiles {
         String queries = null;
         String scoreModel = "vector";
         int queryId = 1;
+        String queryString = null;
+        String queryLines = "";
 
         for (int i = 0; i < args.length; i++) {
             if ("-score".equals(args[i])) {
@@ -88,7 +90,29 @@ public class SearchFiles {
         MultiFieldQueryParser parser = new MultiFieldQueryParser(
                 new String[] { "title", "author", "bibliography", "words" }, analyzer);
 
-        String queryLines = "";
+        // String line = in.readLine();
+        // while (line != null) {
+
+        // if (line.substring(0, 2).equals(".I")) {
+        // line = in.readLine();
+        // queryLines = "";
+        // if (line.substring(0, 2).equals(".W")) {
+        // line = in.readLine();
+        // }
+        // while (!line.substring(0, 2).equals(".I")) {
+        // queryLines += " " + line;
+        // line = in.readLine();
+        // if (line == null) {
+        // break;
+        // }
+        // }
+        // }
+        // Query query = parser.parse(QueryParser.escape(queryLines));
+
+        // doPagingSearch(searcher, query, writer, queryId);
+        // queryId++;
+        // }
+
         Boolean first = true;
         String line = "";
 
@@ -99,7 +123,7 @@ public class SearchFiles {
             if (line.substring(0, 2).equals(".I")) {
                 if (!first) { // If you come across the next document, indicated by the line being ".I"
                     Query query = parser.parse(QueryParser.escape(queryLines));
-                    doSearch(searcher, query, queryId, writer);
+                    doSearch(searcher, query, writer, queryId);
                     queryId++;
                 } else {
                     first = false;
@@ -112,15 +136,18 @@ public class SearchFiles {
 
         Query query = parser.parse(QueryParser.escape(queryLines));
 
-        doSearch(searcher, query, queryId, writer);
+        doSearch(searcher, query, writer, queryId);
 
         writer.close();
         reader.close();
     }
 
+    // ------------------------ PROBLEM SEEMS TO BE IN doPagingSearch METHOD
+    // ------------------------
+
     // Code credit:
     // https://github.com/nating/lucene-search-engine/blob/master/luceneapp/src/main/java/com/mycompany/luceneapp/SearchFiles.java
-    public static void doSearch(IndexSearcher searcher, Query query, Integer queryId, PrintWriter writer)
+    public static void doSearch(IndexSearcher searcher, Query query, PrintWriter writer, Integer queryId)
             throws IOException {
         TopDocs results = searcher.search(query, 1400);
         ScoreDoc[] hits = results.scoreDocs;
@@ -137,4 +164,26 @@ public class SearchFiles {
             writer.println(queryId + " 0 " + doc.get("path") + " " + i + " " + hits[i].score + " EXP");
         }
     }
+
+    // public static void doPagingSearch(IndexSearcher searcher, Query query,
+    // PrintWriter writer, int queryId)
+    // throws IOException {
+
+    // // Collect enough docs to show 5 pages
+    // TopDocs results = searcher.search(query, 1400);
+    // ScoreDoc[] hits = results.scoreDocs;
+
+    // for (int i = 0; i < hits.length; i++) {
+
+    // Document doc = searcher.doc(hits[i].doc);
+    // String path = doc.get("path");
+    // if (path != null) {
+    // // Match format needed for trec_eval
+    // writer.println(queryId + " 0 " + path.replace(".I ", "") + i + " " +
+    // hits[i].score + " EXP");
+    // } else {
+    // System.out.println((i + 1) + ". " + "No path for this document");
+    // }
+    // }
+    // }
 }
