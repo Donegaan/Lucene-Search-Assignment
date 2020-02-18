@@ -58,6 +58,7 @@ public class SearchFiles {
         int queryId = 1;
         String queryString = null;
         String queryLines = "";
+        int hitsPerPage = 1400;
 
         for (int i = 0; i < args.length; i++) {
             if ("-score".equals(args[i])) {
@@ -90,100 +91,61 @@ public class SearchFiles {
         MultiFieldQueryParser parser = new MultiFieldQueryParser(
                 new String[] { "title", "author", "bibliography", "words" }, analyzer);
 
-        // String line = in.readLine();
-        // while (line != null) {
-
-        // if (line.substring(0, 2).equals(".I")) {
-        // line = in.readLine();
-        // queryLines = "";
-        // if (line.substring(0, 2).equals(".W")) {
-        // line = in.readLine();
-        // }
-        // while (!line.substring(0, 2).equals(".I")) {
-        // queryLines += " " + line;
-        // line = in.readLine();
-        // if (line == null) {
-        // break;
-        // }
-        // }
-        // }
-        // Query query = parser.parse(QueryParser.escape(queryLines));
-
-        // doPagingSearch(searcher, query, writer, queryId);
-        // queryId++;
-        // }
-
-        Boolean first = true;
-        String line = "";
-
-        // Code credit:
-        // https://github.com/nating/lucene-search-engine/blob/master/luceneapp/src/main/java/com/mycompany/luceneapp/SearchFiles.java
-        while ((line = in.readLine()) != null) {
+        // Some code from:
+        // https://github.com/dywalsh/ApacheLucene-Search-Engine/blob/master/my-app/src/main/java/com/mycompany/app/SearchFiles.java
+        String line = in.readLine();
+        while (line != null) {
 
             if (line.substring(0, 2).equals(".I")) {
-                if (!first) { // If you come across the next document, indicated by the line being ".I"
-                    Query query = parser.parse(QueryParser.escape(queryLines));
-                    doSearch(searcher, query, writer, queryId);
-                    queryId++;
-                } else {
-                    first = false;
-                }
+                line = in.readLine();
                 queryLines = "";
-            } else {
-                queryLines += " " + line;
+                if (line.substring(0, 2).equals(".W")) {
+                    line = in.readLine();
+                }
+                while (!line.substring(0, 2).equals(".I")) {
+                    queryLines += " " + line;
+                    line = in.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                }
             }
+            Query query = parser.parse(QueryParser.escape(queryLines));
+
+            doPagingSearch(searcher, query, writer, queryId, hitsPerPage, queries == null && queryString == null);
+            queryId++;
         }
-
-        Query query = parser.parse(QueryParser.escape(queryLines));
-
-        doSearch(searcher, query, writer, queryId);
 
         writer.close();
         reader.close();
     }
 
-    // ------------------------ PROBLEM SEEMS TO BE IN doPagingSearch METHOD
-    // ------------------------
-
-    // Code credit:
+    // Some code credit:
     // https://github.com/nating/lucene-search-engine/blob/master/luceneapp/src/main/java/com/mycompany/luceneapp/SearchFiles.java
-    public static void doSearch(IndexSearcher searcher, Query query, PrintWriter writer, Integer queryId)
-            throws IOException {
-        TopDocs results = searcher.search(query, 1400);
+
+    public static void doPagingSearch(IndexSearcher searcher, Query query, PrintWriter writer, int queryId,
+            int hitsPerPage, boolean interactive) throws IOException {
+
+        // Collect enough docs to show 5 pages
+        TopDocs results = searcher.search(query, hitsPerPage);
         ScoreDoc[] hits = results.scoreDocs;
 
-        // Write the results for each hit
-        for (int i = 0; i < hits.length; i++) {
-            Document doc = searcher.doc(hits[i].doc);
-            /*
-             * Write the results in the format expected by trec_eval: | Query Number | 0 |
-             * Document ID | Rank | Score | "EXP" |
-             * (https://stackoverflow.com/questions/4275825/how-to-evaluate-a-search-
-             * retrieval-engine-using-trec-eval)
-             */
-            writer.println(queryId + " 0 " + doc.get("path") + " " + i + " " + hits[i].score + " EXP");
+        int numTotalHits = Math.toIntExact(results.totalHits.value);
+        System.out.println(numTotalHits + " total matching documents");
+
+        int start = 0;
+        int end = Math.min(numTotalHits, hitsPerPage);
+
+        while (true) {
+            end = Math.min(hits.length, start + hitsPerPage);
+            for (int i = 0; i < hits.length; i++) {
+                Document doc = searcher.doc(hits[i].doc);
+                writer.println(queryId + " 0 " + doc.get("path") + " " + i + " " + hits[i].score + " EXP");
+            }
+            if (!interactive || end == 0) {
+                break;
+            }
         }
     }
 
-    // public static void doPagingSearch(IndexSearcher searcher, Query query,
-    // PrintWriter writer, int queryId)
-    // throws IOException {
-
-    // // Collect enough docs to show 5 pages
-    // TopDocs results = searcher.search(query, 1400);
-    // ScoreDoc[] hits = results.scoreDocs;
-
-    // for (int i = 0; i < hits.length; i++) {
-
-    // Document doc = searcher.doc(hits[i].doc);
-    // String path = doc.get("path");
-    // if (path != null) {
-    // // Match format needed for trec_eval
-    // writer.println(queryId + " 0 " + path.replace(".I ", "") + i + " " +
-    // hits[i].score + " EXP");
-    // } else {
-    // System.out.println((i + 1) + ". " + "No path for this document");
-    // }
-    // }
-    // }
 }
