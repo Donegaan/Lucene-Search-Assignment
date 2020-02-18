@@ -206,18 +206,18 @@ public class IndexFiles {
                             currentDocLine = bufferedReader.readLine();
                         }
                         switch (fieldType) { // Needed if multiple lines after field.
-                        case "title":
-                            title += currentDocLine + " ";
-                            break;
-                        case "author":
-                            author += currentDocLine + " ";
-                            break;
-                        case "bibliography":
-                            bib += currentDocLine + " ";
-                            break;
-                        case "words":
-                            words += currentDocLine + " ";
-                            break;
+                            case "title":
+                                title += currentDocLine + " ";
+                                break;
+                            case "author":
+                                author += currentDocLine + " ";
+                                break;
+                            case "bibliography":
+                                bib += currentDocLine + " ";
+                                break;
+                            case "words":
+                                words += currentDocLine + " ";
+                                break;
                         }
                         currentDocLine = bufferedReader.readLine();
                         if (currentDocLine == null) {

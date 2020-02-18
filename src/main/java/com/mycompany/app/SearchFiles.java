@@ -110,7 +110,8 @@ public class SearchFiles {
                     }
                 }
             }
-            Query query = parser.parse(QueryParser.escape(queryLines)); // Create query from
+            // Create separate queries for each ".I" in cran.qry
+            Query query = parser.parse(QueryParser.escape(queryLines));
 
             doPagingSearch(searcher, query, writer, queryId, hitsPerPage, queries == null && queryString == null);
             queryId++;
