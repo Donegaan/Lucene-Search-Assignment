@@ -96,21 +96,21 @@ public class SearchFiles {
         String line = in.readLine();
         while (line != null) {
 
-            if (line.substring(0, 2).equals(".I")) {
+            if (line.substring(0, 2).equals(".I")) { // Detect new query
                 line = in.readLine();
                 queryLines = "";
                 if (line.substring(0, 2).equals(".W")) {
                     line = in.readLine();
                 }
                 while (!line.substring(0, 2).equals(".I")) {
-                    queryLines += " " + line;
+                    queryLines += " " + line; // Concatenate all of the query lines
                     line = in.readLine();
                     if (line == null) {
                         break;
                     }
                 }
             }
-            Query query = parser.parse(QueryParser.escape(queryLines));
+            Query query = parser.parse(QueryParser.escape(queryLines)); // Create query from
 
             doPagingSearch(searcher, query, writer, queryId, hitsPerPage, queries == null && queryString == null);
             queryId++;
